@@ -24,19 +24,33 @@ type FirebaseQuestions = Record<
     };
     content: string;
     isAnswered: boolean;
-    isHighLighted: boolean;
+    isHighlighted: boolean;
   }
 >;
+
+type Question = {
+  id: string;
+  author: {
+    name: string;
+    avatar: string;
+  };
+  content: string;
+  isAnswered: boolean;
+  isHighlighted: boolean;
+};
 
 export function Room() {
   const { user } = useAuth();
   const params = useParams<RoomParams>();
   const roomId = params.id;
+  const [newQuestion, setNewQuestion] = useState("");
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [title, setTitle] = useState("");
 
   useEffect(() => {
     const roomRef = database.ref(`rooms/${roomId}`);
 
-    roomRef.once("value", (room) => {
+    roomRef.on("value", (room) => {
       const databaseRoom = room.val();
       const firebaseQuestions: FirebaseQuestions = databaseRoom.questions;
 
@@ -46,16 +60,15 @@ export function Room() {
             id: key,
             content: value.content,
             author: value.author,
-            isHighlighted: value.isHighLighted,
+            isHighlighted: value.isHighlighted,
             isAnswered: value.isAnswered,
           };
         }
       );
-      console.log(parsedQuestions);
+      setTitle(databaseRoom.title);
+      setQuestions(parsedQuestions);
     });
   }, [roomId]);
-
-  const [newQuestion, setNewQuestion] = useState("");
 
   async function handleSendQuestion(event: FormEvent) {
     event.preventDefault();
@@ -93,8 +106,8 @@ export function Room() {
       </header>
       <main>
         <div className="room-title">
-          <h1>Sala React</h1>
-          <span>4 perguntas</span>
+          <h1>Sala {title}</h1>
+          {questions.length > 0 && <span>{questions.length} perguntas</span>}
         </div>
         <form onSubmit={handleSendQuestion}>
           <textarea
@@ -119,6 +132,8 @@ export function Room() {
             </Button>
           </div>
         </form>
+
+        {JSON.stringify(questions)}
       </main>
     </div>
   );
