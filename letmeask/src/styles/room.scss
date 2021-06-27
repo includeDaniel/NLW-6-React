@@ -13,6 +13,9 @@
       > img {
         max-height: 45px;
       }
+      > div {
+        display: flex;
+      }
     }
   }
 
@@ -93,6 +96,10 @@
           }
         }
       }
+    }
+
+    .question-list {
+      margin-top: 32px;
     }
   }
 }
